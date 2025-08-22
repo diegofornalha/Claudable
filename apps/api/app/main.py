@@ -12,6 +12,7 @@ from app.api.settings import router as settings_router
 from app.api.project_services import router as project_services_router
 from app.api.github import router as github_router
 from app.api.vercel import router as vercel_router
+from app.api.claudable_interactive import router as claudable_interactive_router
 from app.core.logging import configure_logging
 from app.core.terminal_ui import ui
 from fastapi import WebSocket

@@ -38,10 +38,6 @@ class ClaudableTerminal:
                 'authenticated': False
             }
         
-        # Para o comando 'claude' sem argumentos, adiciona --help para evitar erro
-        if command == 'claude':
-            # Mostra uma mensagem útil em vez do erro
-            command = 'claude --help'
         
         try:
             # Executa o comando no diretório atual mantido
@@ -58,14 +54,14 @@ class ClaudableTerminal:
             try:
                 stdout, stderr = await asyncio.wait_for(
                     process.communicate(),
-                    timeout=5.0  # 5 segundos de timeout
+                    timeout=5.0
                 )
             except asyncio.TimeoutError:
                 # Se o comando travou (provavelmente esperando input)
                 process.kill()
                 return {
                     'success': False,
-                    'output': 'Comando interrompido: timeout aguardando input',
+                    'output': '',
                     'authenticated': False
                 }
             
@@ -85,6 +81,7 @@ class ClaudableTerminal:
                         output += '\n' + stderr_text
                     else:
                         output = stderr_text
+            
             
             return {
                 'success': process.returncode == 0,
