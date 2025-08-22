@@ -22,20 +22,20 @@ router = APIRouter()
 class MessageResponse(BaseModel):
     id: str
     role: str
-    message_type: str | None
+    message_type: Optional[str]
     content: str
-    metadata_json: dict | None = None
-    parent_message_id: str | None = None
-    session_id: str | None = None
-    conversation_id: str | None = None
-    cli_source: str | None = None
+    metadata_json: Optional[dict] = None
+    parent_message_id: Optional[str] = None
+    session_id: Optional[str] = None
+    conversation_id: Optional[str] = None
+    cli_source: Optional[str] = None
     created_at: datetime
 
 
 class SendMessageRequest(BaseModel):
     content: str
     role: str = "user"
-    conversation_id: str | None = None
+    conversation_id: Optional[str] = None
 
 
 @router.get("/{project_id}/messages", response_model=List[MessageResponse])

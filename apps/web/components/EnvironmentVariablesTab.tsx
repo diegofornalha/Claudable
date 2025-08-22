@@ -273,7 +273,15 @@ export default function EnvironmentVariablesTab({ projectId }: EnvironmentVariab
             <div className="text-center py-8 bg-gray-50 dark:bg-gray-700 rounded-lg">
               <div className="text-gray-400 dark:text-gray-500 text-4xl mb-2">🔧</div>
               <p className="text-gray-600 dark:text-gray-400 text-sm">Nenhuma variável de ambiente configurada</p>
-              <p className="text-gray-500 dark:text-gray-500 text-xs mt-1">Adicione sua primeira variável acima para começar</p>
+              <p className="text-gray-500 dark:text-gray-500 text-xs mt-2">
+                Adicione variáveis de ambiente usando o formulário acima.
+              </p>
+              <p className="text-gray-500 dark:text-gray-500 text-xs mt-1">
+                💡 Dica: Com Claude CLI autenticado, você não precisa de API keys!
+                <a href="/login" className="text-[#DE7356] hover:text-[#c95940] ml-1">
+                  Fazer login →
+                </a>
+              </p>
             </div>
           ) : (
             <AnimatePresence>

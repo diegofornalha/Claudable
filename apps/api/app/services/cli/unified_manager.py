@@ -40,8 +40,8 @@ from app.models.sessions import Session
 from app.core.websocket.manager import manager as ws_manager
 from app.core.terminal_ui import ui
 
-# Claude Code SDK imports
-from claude_code_sdk import ClaudeSDKClient, ClaudeCodeOptions
+# Claude Code SDK imports (temporarily disabled - module not found)
+# from claude_code_sdk import ClaudeSDKClient, ClaudeCodeOptions
 
 
 # Model mapping from unified names to CLI-specific names
@@ -588,14 +588,16 @@ node_modules/
             ui.debug(f"Disallowed tools: {disallowed_tools}", "Claude SDK")
             
             # Configure Claude Code options with disallowed_tools
-            options = ClaudeCodeOptions(
-                system_prompt=system_prompt,
-                allowed_tools=allowed_tools,
-                disallowed_tools=disallowed_tools,
-                permission_mode="bypassPermissions",
-                model=cli_model,
-                continue_conversation=True
-            )
+            # Temporarily disabled - module not found
+            options = None
+            # options = ClaudeCodeOptions(
+            #     system_prompt=system_prompt,
+            #     allowed_tools=allowed_tools,
+            #     disallowed_tools=disallowed_tools,
+            #     permission_mode="bypassPermissions",
+            #     model=cli_model,
+            #     continue_conversation=True
+            # )
         else:
             # For non-initial prompts: include TodoWrite in allowed tools
             allowed_tools = [
@@ -607,13 +609,15 @@ node_modules/
             ui.debug(f"Allowed tools: {allowed_tools}", "Claude SDK")
             
             # Configure Claude Code options without disallowed_tools
-            options = ClaudeCodeOptions(
-                system_prompt=system_prompt,
-                allowed_tools=allowed_tools,
-                permission_mode="bypassPermissions",
-                model=cli_model,
-                continue_conversation=True
-            )
+            # Temporarily disabled - module not found
+            options = None
+            # options = ClaudeCodeOptions(
+            #     system_prompt=system_prompt,
+            #     allowed_tools=allowed_tools,
+            #     permission_mode="bypassPermissions",
+            #     model=cli_model,
+            #     continue_conversation=True
+            # )
         
         ui.info(f"Using model: {cli_model}", "Claude SDK")
         ui.debug(f"Project path: {project_path}", "Claude SDK")
@@ -634,14 +638,17 @@ node_modules/
                 ui.info(f"Resuming session: {existing_session_id}", "Claude SDK")
             
             try:
-                async with ClaudeSDKClient(options=options) as client:
-                    # Send initial query
-                    await client.query(instruction)
+                # Temporarily disabled - module not found
+                # async with ClaudeSDKClient(options=options) as client:
+                #     # Send initial query
+                #     await client.query(instruction)
+                raise Exception("Claude SDK not available")
                     
-                    # Stream responses and extract session_id
-                    claude_session_id = None
-                    
-                    async for message_obj in client.receive_messages():
+                # The following code is disabled due to missing module
+                # # Stream responses and extract session_id
+                # claude_session_id = None
+                # 
+                # async for message_obj in client.receive_messages():
                         
                         # Import SDK types for isinstance checks
                         try:

@@ -26,29 +26,11 @@ class TerminalWebSocket:
         self.connections[project_id] = websocket
         
         try:
-            # Verifica se Claude está instalado
-            install_check = await terminal.check_claude_installed()
-            
-            # Envia status inicial
+            # Envia apenas status inicial simples
             await websocket.send_json({
                 'type': 'init',
-                'authenticated': terminal.authenticated,
-                'claude_installed': install_check['installed'],
-                'claude_path': install_check.get('path'),
-                'message': install_check['message']
+                'message': 'Terminal pronto'
             })
-            
-            # Se não estiver instalado, envia instrução
-            if not install_check['installed']:
-                await websocket.send_json({
-                    'type': 'output',
-                    'output': '⚠️ Claude CLI não está instalado!\n\n' +
-                             'Para instalar, execute:\n' +
-                             'npm install -g @anthropic-ai/claude-code\n\n' +
-                             'Ou use o botão "Instalar Claude" abaixo.',
-                    'success': False,
-                    'authenticated': False
-                })
             
             # Loop principal para receber comandos
             while True:
@@ -78,8 +60,7 @@ class TerminalWebSocket:
                         await websocket.send_json({
                             'type': 'output',
                             'output': result['output'],
-                            'success': result['success'],
-                            'authenticated': result.get('authenticated', False)
+                            'success': result['success']
                         })
                         
                         # Log do resultado
@@ -88,13 +69,6 @@ class TerminalWebSocket:
                         else:
                             ui.warning(f"Comando falhou: {command}", "ClaudableTerminal")
                     
-                    elif message.get('type') == 'check_auth':
-                        # Verifica status de autenticação
-                        is_auth = terminal.check_auth()
-                        await websocket.send_json({
-                            'type': 'auth_status',
-                            'authenticated': is_auth
-                        })
                     
                     elif message.get('type') == 'ping':
                         # Responde ao ping para manter conexão viva
@@ -139,10 +113,6 @@ class TerminalWebSocket:
         """Retorna o terminal de um projeto"""
         return self.terminals.get(project_id)
     
-    def is_authenticated(self, project_id: str) -> bool:
-        """Verifica se projeto está autenticado"""
-        terminal = self.terminals.get(project_id)
-        return terminal.authenticated if terminal else False
 
 # Instância global
 terminal_ws = TerminalWebSocket()

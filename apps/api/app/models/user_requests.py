@@ -1,3 +1,4 @@
+from typing import Optional
 """
 User Request Model
 사용자 요청별 작업 상태 추적 모델
@@ -33,7 +34,7 @@ class UserRequest(Base):
     )
     
     # 실행 세션 연결 (1:1 또는 1:N 관계 가능)
-    session_id: Mapped[str | None] = mapped_column(
+    session_id: Mapped[Optional[str]] = mapped_column(
         String(64), 
         ForeignKey("sessions.id", ondelete="SET NULL"), 
         index=True
@@ -45,20 +46,20 @@ class UserRequest(Base):
     
     # 완료 상태 추적
     is_completed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
-    is_successful: Mapped[bool | None] = mapped_column(Boolean, nullable=True)  # None: 진행중, True: 성공, False: 실패
+    is_successful: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)  # None: 진행중, True: 성공, False: 실패
     
     # 실행 결과 메타데이터  
-    result_metadata: Mapped[dict | None] = mapped_column(JSON, nullable=True)
-    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    result_metadata: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     # CLI 정보
-    cli_type_used: Mapped[str | None] = mapped_column(String(32), nullable=True)
-    model_used: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    cli_type_used: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
+    model_used: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     
     # 타임스탬프
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
-    started_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    started_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     
     # Relationships
     project = relationship("Project", back_populates="user_requests")
@@ -66,7 +67,7 @@ class UserRequest(Base):
     session = relationship("Session", back_populates="user_requests")
 
     @property
-    def duration_ms(self) -> int | None:
+    def duration_ms(self) -> Optional[int]:
         """요청 처리 시간 계산 (밀리초)"""
         if self.started_at and self.completed_at:
             return int((self.completed_at - self.started_at).total_seconds() * 1000)

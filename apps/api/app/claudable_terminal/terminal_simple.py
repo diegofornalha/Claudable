@@ -1,173 +1,152 @@
-"""Terminal simples para Claude CLI - MVP"""
+"""Terminal livre e interativo - Sem restrições"""
 import asyncio
-import json
+import os
 from typing import Dict, Optional
 from pathlib import Path
-from datetime import datetime
 
 class ClaudableTerminal:
-    """Terminal básico para comandos Claude"""
-    
-    # Só comandos essenciais
-    ALLOWED_COMMANDS = [
-        'claude login',
-        'claude logout', 
-        'claude auth status',
-        'claude auth whoami',
-        'claude --version',
-        'claude --help',
-        'which claude',
-        'npm install -g @anthropic-ai/claude-code'
-    ]
+    """Terminal totalmente livre para qualquer comando"""
     
     def __init__(self, project_id: str):
         self.project_id = project_id
-        self.authenticated = False
-        self.auth_file = Path.home() / '.claudable' / f'{project_id}_auth.json'
-        self.auth_file.parent.mkdir(parents=True, exist_ok=True)
-        # Verifica autenticação prévia
-        self.authenticated = self.check_auth()
+        # Mantém o diretório atual para cada terminal
+        self.current_dir = str(Path.home())
         
     async def execute(self, command: str) -> Dict:
-        """Executa comando se permitido"""
+        """Executa QUALQUER comando sem restrições"""
         
         # Remove espaços extras
         command = command.strip()
         
-        # Validação básica
-        if not any(command.startswith(cmd.split()[0]) for cmd in self.ALLOWED_COMMANDS):
+        if not command:
             return {
-                'success': False,
-                'output': '❌ Comando não permitido. Use apenas comandos Claude:\n' + 
-                         '  • claude login\n' +
-                         '  • claude logout\n' +
-                         '  • claude auth status\n' +
-                         '  • claude --version\n' +
-                         '  • npm install -g @anthropic-ai/claude-code',
-                'authenticated': self.authenticated
+                'success': True,
+                'output': '',
+                'authenticated': False
             }
         
+        # Trata comando cd especialmente para manter o contexto
+        if command.startswith('cd '):
+            new_dir = command[3:].strip()
+            return await self._handle_cd(new_dir)
+        
+        # Para o comando 'pwd', retorna o diretório atual
+        if command == 'pwd':
+            return {
+                'success': True,
+                'output': self.current_dir,
+                'authenticated': False
+            }
+        
+        # Para o comando 'claude' sem argumentos, adiciona --help para evitar erro
+        if command == 'claude':
+            # Mostra uma mensagem útil em vez do erro
+            command = 'claude --help'
+        
         try:
-            # Executa comando
+            # Executa o comando no diretório atual mantido
             process = await asyncio.create_subprocess_shell(
                 command,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
-                shell=True
+                shell=True,
+                cwd=self.current_dir,  # Usa o diretório atual mantido
+                env={**os.environ, 'TERM': 'xterm-256color'}  # Adiciona variável TERM
             )
             
-            stdout, stderr = await process.communicate()
+            # Timeout para comandos que podem travar esperando input
+            try:
+                stdout, stderr = await asyncio.wait_for(
+                    process.communicate(),
+                    timeout=5.0  # 5 segundos de timeout
+                )
+            except asyncio.TimeoutError:
+                # Se o comando travou (provavelmente esperando input)
+                process.kill()
+                return {
+                    'success': False,
+                    'output': 'Comando interrompido: timeout aguardando input',
+                    'authenticated': False
+                }
             
             # Decodifica output
             stdout_text = stdout.decode('utf-8', errors='ignore')
             stderr_text = stderr.decode('utf-8', errors='ignore')
-            output = stdout_text + stderr_text
             
-            # Detecta autenticação bem-sucedida
-            auth_indicators = [
-                'Successfully authenticated',
-                'Logged in as',
-                'Authentication successful',
-                'Already logged in'
-            ]
-            
-            if any(indicator in output for indicator in auth_indicators):
-                self.authenticated = True
-                self._save_auth_status()
-                output += '\n\n✅ Autenticação detectada e salva!'
-            
-            # Detecta logout
-            if 'logged out' in output.lower() or 'logout successful' in output.lower():
-                self.authenticated = False
-                self._clear_auth_status()
-                output += '\n\n✅ Logout realizado!'
+            # Combina stdout e stderr
+            output = stdout_text
+            if stderr_text:
+                # Para alguns comandos, stderr não é erro (ex: git)
+                if process.returncode != 0:
+                    output = stderr_text if not output else output + '\n' + stderr_text
+                else:
+                    # Se returncode é 0, stderr pode ser apenas info
+                    if output:
+                        output += '\n' + stderr_text
+                    else:
+                        output = stderr_text
             
             return {
                 'success': process.returncode == 0,
-                'output': output if output else '✓ Comando executado',
-                'authenticated': self.authenticated
-            }
-            
-        except FileNotFoundError:
-            return {
-                'success': False,
-                'output': '❌ Claude CLI não encontrado. Execute:\nnpm install -g @anthropic-ai/claude-code',
+                'output': output if output else '✓',
                 'authenticated': False
             }
+            
         except Exception as e:
             return {
                 'success': False,
-                'output': f'❌ Erro: {str(e)}',
-                'authenticated': self.authenticated
+                'output': f'Erro: {str(e)}',
+                'authenticated': False
             }
     
-    def _save_auth_status(self):
-        """Salva status de auth em arquivo"""
+    async def _handle_cd(self, new_dir: str) -> Dict:
+        """Trata o comando cd mantendo o contexto do diretório"""
         try:
-            auth_data = {
-                'project_id': self.project_id,
-                'authenticated': True,
-                'timestamp': datetime.now().isoformat(),
-                'method': 'claude_cli'
-            }
-            self.auth_file.write_text(json.dumps(auth_data, indent=2))
-            print(f"✅ Auth status salvo para projeto {self.project_id}")
-        except Exception as e:
-            print(f"⚠️ Erro ao salvar auth: {e}")
-    
-    def _clear_auth_status(self):
-        """Limpa status de autenticação"""
-        try:
-            if self.auth_file.exists():
-                self.auth_file.unlink()
-                print(f"✅ Auth status limpo para projeto {self.project_id}")
-        except Exception as e:
-            print(f"⚠️ Erro ao limpar auth: {e}")
-    
-    def check_auth(self) -> bool:
-        """Verifica se está autenticado"""
-        if self.auth_file.exists():
-            try:
-                data = json.loads(self.auth_file.read_text())
-                # Verifica se não é muito antigo (7 dias)
-                saved_time = datetime.fromisoformat(data['timestamp'])
-                age_days = (datetime.now() - saved_time).days
-                if age_days > 7:
-                    print(f"⚠️ Auth expirado ({age_days} dias)")
-                    return False
-                return data.get('authenticated', False)
-            except Exception as e:
-                print(f"⚠️ Erro ao ler auth: {e}")
-        return False
-    
-    async def check_claude_installed(self) -> Dict:
-        """Verifica se Claude CLI está instalado"""
-        try:
-            process = await asyncio.create_subprocess_shell(
-                'which claude',
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-                shell=True
-            )
+            # Resolve o caminho
+            if new_dir.startswith('~'):
+                new_dir = os.path.expanduser(new_dir)
+            elif not os.path.isabs(new_dir):
+                # Caminho relativo
+                new_dir = os.path.join(self.current_dir, new_dir)
             
-            stdout, _ = await process.communicate()
+            # Normaliza o caminho
+            new_dir = os.path.normpath(new_dir)
             
-            if process.returncode == 0 and stdout:
-                path = stdout.decode().strip()
+            # Verifica se o diretório existe
+            if os.path.isdir(new_dir):
+                self.current_dir = new_dir
                 return {
-                    'installed': True,
-                    'path': path,
-                    'message': f'✅ Claude CLI encontrado em: {path}'
+                    'success': True,
+                    'output': f'',  # cd normalmente não retorna output
+                    'authenticated': False
                 }
             else:
                 return {
-                    'installed': False,
-                    'path': None,
-                    'message': '❌ Claude CLI não instalado. Execute: npm install -g @anthropic-ai/claude-code'
+                    'success': False,
+                    'output': f'cd: {new_dir}: No such file or directory',
+                    'authenticated': False
                 }
         except Exception as e:
             return {
+                'success': False,
+                'output': f'cd: {str(e)}',
+                'authenticated': False
+            }
+    
+    async def check_claude_installed(self) -> Dict:
+        """Verifica se Claude está instalado"""
+        result = await self.execute('which claude')
+        
+        if result['success'] and result['output'].strip():
+            path = result['output'].strip()
+            return {
+                'installed': True,
+                'path': path,
+                'message': f'Claude encontrado: {path}'
+            }
+        else:
+            return {
                 'installed': False,
                 'path': None,
-                'message': f'❌ Erro ao verificar: {str(e)}'
+                'message': 'Claude não encontrado'
             }

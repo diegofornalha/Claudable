@@ -16,7 +16,7 @@ from app.models.messages import Message
 from app.models.sessions import Session as ChatSession
 from app.models.commits import Commit
 from app.models.user_requests import UserRequest
-from app.services.cli.unified_manager import UnifiedCLIManager, CLIType
+from app.services.cli.unified_manager_simple import UnifiedCLIManager, CLIType
 from app.services.git_ops import commit_all
 from app.core.websocket.manager import manager
 from app.core.terminal_ui import ui
@@ -33,8 +33,8 @@ class ImageAttachment(BaseModel):
 
 class ActRequest(BaseModel):
     instruction: str
-    conversation_id: str | None = None
-    cli_preference: str | None = None
+    conversation_id: Optional[str] = None
+    cli_preference: Optional[str] = None
     fallback_enabled: bool = True
     images: List[ImageAttachment] = []
     is_initial_prompt: bool = False

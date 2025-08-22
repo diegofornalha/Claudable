@@ -1,3 +1,4 @@
+from typing import Optional
 from sqlalchemy import String, DateTime, ForeignKey, Text, Boolean, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
@@ -23,7 +24,7 @@ class EnvVar(Base):
     is_secret: Mapped[bool] = mapped_column(Boolean, default=True)
     
     # Metadata
-    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
