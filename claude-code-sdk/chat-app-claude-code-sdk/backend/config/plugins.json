@@ -1,0 +1,24 @@
+{
+  "enabled": [],
+  "available": [
+    {
+      "id": "crew-ai",
+      "name": "CrewAI Agent",
+      "description": "Multi-agent system for complex tasks",
+      "repository": "https://github.com/example/crew-ai-plugin",
+      "installCommand": "npm install crew-ai-plugin"
+    },
+    {
+      "id": "helloworld",
+      "name": "HelloWorld Agent",
+      "description": "Simple example agent plugin",
+      "repository": "https://github.com/example/helloworld-plugin",
+      "installCommand": "npm install helloworld-plugin"
+    }
+  ],
+  "settings": {
+    "autoReload": true,
+    "watchDirectories": true,
+    "maxPlugins": 10
+  }
+}

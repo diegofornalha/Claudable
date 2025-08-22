@@ -1,0 +1,3 @@
+[submodule "providers/ai-sdk-provider"]
+	path = providers/ai-sdk-provider
+	url = ../ai-sdk-provider
