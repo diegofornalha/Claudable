@@ -67,6 +67,7 @@ app.include_router(settings_router)  # Settings API
 app.include_router(project_services_router)  # Project services API
 app.include_router(github_router)  # GitHub integration API
 app.include_router(vercel_router)  # Vercel integration API
+app.include_router(claudable_interactive_router)  # Terminal interativo com PTY
 
 
 # ClaudableTerminal WebSocket endpoint
