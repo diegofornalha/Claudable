@@ -109,13 +109,7 @@ export default function ClaudableTerminal({ projectId, onAuthenticated }: Clauda
             command: input.trim()
           }));
         } else {
-          // Se não conectado, mostra comando e aguarda conexão
-          setLines(prev => [
-            ...prev.slice(0, -1),
-            `$ ${input}`,
-            'Aguardando conexão...',
-            '$ '
-          ]);
+          // Se não conectado, apenas limpa o input
           setInput('');
         }
       } else {

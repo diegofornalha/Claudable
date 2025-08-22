@@ -10,8 +10,8 @@ export default function LoginPage() {
 
   useEffect(() => {
     setMounted(true);
-    // Carrega o componente ClaudableTerminal dinamicamente apenas no cliente
-    import('../../components/ClaudableTerminal').then((mod) => {
+    // Carrega o componente ClaudableTerminalInteractive dinamicamente apenas no cliente
+    import('../../components/ClaudableTerminalInteractive').then((mod) => {
       setClaudableTerminal(() => mod.default);
     });
   }, []);
