@@ -169,9 +169,9 @@ export default function EnvironmentVariablesTab({ projectId }: EnvironmentVariab
       <div>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Environment Variables</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Variáveis de Ambiente</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Manage environment variables for your Next.js project. Changes are automatically synced to your .env file.
+              Gerencie as variáveis de ambiente do seu projeto Next.js. As alterações são sincronizadas automaticamente com seu arquivo .env.
             </p>
           </div>
           
@@ -262,18 +262,18 @@ export default function EnvironmentVariablesTab({ projectId }: EnvironmentVariab
           </div>
         </div>
 
-        {/* Environment Variables List */}
+        {/* Lista de Variáveis de Ambiente */}
         <div className="space-y-3">
           {isLoading ? (
             <div className="text-center py-8">
               <div className="w-6 h-6 border-2 border-[#DE7356] border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-              <p className="text-sm text-gray-600 dark:text-gray-400">Loading environment variables...</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Carregando variáveis de ambiente...</p>
             </div>
           ) : envVars.length === 0 ? (
             <div className="text-center py-8 bg-gray-50 dark:bg-gray-700 rounded-lg">
               <div className="text-gray-400 dark:text-gray-500 text-4xl mb-2">🔧</div>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">No environment variables configured</p>
-              <p className="text-gray-500 dark:text-gray-500 text-xs mt-1">Add your first variable above to get started</p>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">Nenhuma variável de ambiente configurada</p>
+              <p className="text-gray-500 dark:text-gray-500 text-xs mt-1">Adicione sua primeira variável acima para começar</p>
             </div>
           ) : (
             <AnimatePresence>
@@ -385,13 +385,13 @@ export default function EnvironmentVariablesTab({ projectId }: EnvironmentVariab
             </div>
             <div>
               <h4 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-1">
-                Environment Variables
+                Variáveis de Ambiente
               </h4>
               <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-                <p>• All variables are securely encrypted and stored</p>
-                <p>• Changes are automatically synced to your project's .env file</p>
-                <p>• Variables are available during build and runtime</p>
-                <p>• Use NEXT_PUBLIC_ prefix for client-side variables</p>
+                <p>• Todas as variáveis são criptografadas e armazenadas com segurança</p>
+                <p>• As alterações são sincronizadas automaticamente com o arquivo .env do seu projeto</p>
+                <p>• As variáveis estão disponíveis durante a construção e execução</p>
+                <p>• Use o prefixo NEXT_PUBLIC_ para variáveis do lado do cliente</p>
               </div>
             </div>
           </div>

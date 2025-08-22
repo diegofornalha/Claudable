@@ -115,7 +115,7 @@ export function EnvironmentSettings({ projectId }: EnvironmentSettingsProps) {
     <div className="p-6 space-y-6">
       <div>
         <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-          Environment Variables
+          Variáveis de Ambiente
         </h3>
 
         {/* Variables List */}
@@ -123,7 +123,7 @@ export function EnvironmentSettings({ projectId }: EnvironmentSettingsProps) {
           {isLoading ? (
             <div className="text-gray-500">Loading...</div>
           ) : variables.length === 0 ? (
-            <div className="text-gray-500 text-sm">No environment variables configured</div>
+            <div className="text-gray-500 text-sm">Nenhuma variável de ambiente configurada</div>
           ) : (
             variables.map((variable, index) => (
               <div

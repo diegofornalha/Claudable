@@ -618,7 +618,7 @@ export default function ProjectSettings({ isOpen, onClose, projectId, projectNam
                 { id: 'general' as const, label: 'General', icon: '📋' },
                 { id: 'ai-assistant' as const, label: 'AI Assistant', icon: '🤖' },
                 { id: 'services' as const, label: 'Services', icon: '🔗' },
-                { id: 'deployment' as const, label: 'Environment Variables', icon: '🔧' },
+                { id: 'deployment' as const, label: 'Variáveis de Ambiente', icon: '🔧' },
                 { id: 'danger' as const, label: 'Danger Zone', icon: '⚠️' }
               ].map(tab => (
                 <button
