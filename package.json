@@ -1,32 +1,53 @@
 {
-  "name": "cc-lovable",
-  "version": "1.0.0",
-  "private": true,
-  "description": "CC Lovable Development Environment",
-  "workspaces": [
-    "apps/web"
+  "name": "@knowall-ai/mcp-neo4j-agent-memory",
+  "version": "0.2.5",
+  "description": "Graph-based memory system for AI agents. Store people, places, organizations as nodes. Build semantic relationships (KNOWS, WORKS_AT, CREATED). Word-tokenized search finds partial matches. Filter by date, traverse relationships, maintain temporal context. Simple tools, LLM handles complexity. 10 tools for complete memory management.",
+  "type": "module",
+  "module": "./src/index.ts",
+  "bin": {
+    "mcp-neo4j-agent-memory": "build/index.js"
+  },
+  "files": [
+    "build"
   ],
   "scripts": {
-    "dev": "npm run ensure:env && npm run ensure:venv && concurrently --raw \"npm run dev:api\" --prefix \"[WEB] \" \"npm run dev:web\"",
-    "dev:api": "node scripts/run-api.js",
-    "dev:web": "node scripts/run-web.js",
-    "ensure:env": "node scripts/setup-env.js",
-    "ensure:venv": "node scripts/setup-venv.js",
-    "postinstall": "npm run ensure:env && npm run ensure:venv",
-    "setup": "npm install",
-    "clean": "node scripts/clean.js",
-    "db:reset": "node scripts/reset-db.js",
-    "db:backup": "node scripts/backup-db.js"
-  },
-  "devDependencies": {
-    "concurrently": "^8.2.2",
-    "dotenv": "^16.4.5"
-  },
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=9.0.0"
+    "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
+    "prepare": "npm run build",
+    "watch": "tsc --watch",
+    "inspector": "npx @modelcontextprotocol/inspector build/index.js"
   },
   "dependencies": {
-    "react-icons": "^5.5.0"
-  }
+    "@modelcontextprotocol/sdk": "0.6.0",
+    "dotenv": "^17.2.0",
+    "neo4j-driver": "^5.27.0",
+    "uuid": "^11.0.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  },
+  "keywords": [
+    "mcp",
+    "neo4j",
+    "graph-database",
+    "claude",
+    "ai-memory",
+    "voice-assistant",
+    "agent-memory",
+    "knowledge-graph"
+  ],
+  "author": "KnowAll AI",
+  "contributors": [
+    "Daichi Okazaki (original author)"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KnowAll-AI/mcp-neo4j-agent-memory.git"
+  },
+  "bugs": {
+    "url": "https://github.com/KnowAll-AI/mcp-neo4j-agent-memory/issues"
+  },
+  "homepage": "https://github.com/KnowAll-AI/mcp-neo4j-agent-memory#readme"
 }
