@@ -10,7 +10,7 @@ const apiDir = path.join(__dirname, '..', 'apps', 'api');
 const isWindows = os.platform() === 'win32';
 
 // Get API port from environment or use default
-const apiPort = process.env.API_PORT || 8080;
+const apiPort = process.env.API_PORT || 8000;
 
 // Determine Python path in venv
 const pythonPath = isWindows 

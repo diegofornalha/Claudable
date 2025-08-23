@@ -19,13 +19,13 @@
 - **FastAPI**: http://localhost:8000
   - WebSocket: ws://localhost:8000/ws/terminal/{project_id}
   
-- **Next.js**: http://localhost:3001
+- **Next.js**: http://localhost:3001'
   - ClaudableTerminal visível na aba "Variáveis de Ambiente"
 
 ## 📝 Como Testar
 
 1. **Abrir aplicação web**:
-   - Acesse http://localhost:3001
+   - Acesse http://localhost:3001'
    - Crie ou selecione um projeto
    - Vá para aba "Variáveis de Ambiente"
 
