@@ -128,7 +128,7 @@ export default function ClaudableTerminalInteractive({
 
   const connectWebSocket = () => {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.hostname}:8080/ws/terminal/interactive/${projectId}`;
+    const wsUrl = `${protocol}//${window.location.hostname}:8000/ws/terminal/interactive/${projectId}`;
     
     ws.current = new WebSocket(wsUrl);
 
