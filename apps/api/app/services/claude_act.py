@@ -1,14 +1,20 @@
 import os
 from typing import Tuple, Optional, Callable
 import json
+import time
 from datetime import datetime
 from pathlib import Path
 
-from claude_code_sdk import query, ClaudeCodeOptions
-from claude_code_sdk.types import (
-    Message, UserMessage, AssistantMessage, SystemMessage, ResultMessage,
-    ContentBlock, TextBlock, ThinkingBlock, ToolUseBlock, ToolResultBlock
-)
+try:
+    # Use the new ClaudeSDKClient
+    from .claude_code_client import ClaudeSDKClient, ClaudeCodeOptions
+except ImportError:
+    # Fallback to old import if new client not available
+    from claude_code_sdk import query, ClaudeCodeOptions
+    from claude_code_sdk.types import (
+        Message, UserMessage, AssistantMessage, SystemMessage, ResultMessage,
+        ContentBlock, TextBlock, ThinkingBlock, ToolUseBlock, ToolResultBlock
+    )
 
 
 DEFAULT_MODEL = os.getenv("CLAUDE_CODE_MODEL", "claude-sonnet-4-20250514")
@@ -154,9 +160,8 @@ async def generate_diff_with_logging(
     Returns:
         Tuple of (commit_message, changes_summary, session_id)
     """
-    # Claude Code SDK can work without API key in local mode
-    if not os.getenv("ANTHROPIC_API_KEY"):
-        print("Note: Running Claude Code SDK in local mode (no API key)")
+    # Claude Code SDK uses integrated authentication (claude login)
+    print("✅ Using Claude Code SDK with integrated authentication")
     
     # Build a simple, direct prompt  
     user_prompt = (
@@ -170,41 +175,176 @@ async def generate_diff_with_logging(
     # Use provided system prompt or default (dynamically loaded)
     effective_system_prompt = system_prompt if system_prompt is not None else get_system_prompt()
     
-    # Setup Claude Code options with session resumption
-    options = ClaudeCodeOptions(
-        cwd=repo_path,
-        allowed_tools=["Read", "Write", "Edit", "MultiEdit", "Bash", "Glob", "Grep", "LS"],
-        permission_mode='acceptEdits',
-        system_prompt=effective_system_prompt,
-        model=DEFAULT_MODEL,  # Use Claude 4 Sonnet model
-        resume=resume_session_id  # Resume existing session if provided
-    )
-    
-    response_text = ""
-    messages_received = []
-    pending_tools = {}  # Track tool use/result pairs
-    current_session_id = None  # Track the current Claude Code session ID
-    
-    start_time = datetime.now()
-    
+    # Try to use new ClaudeSDKClient first
     try:
-        print(f"Starting Claude Code SDK query with prompt: {user_prompt[:100]}...")
-        message_count = 0
+        # Use the new ClaudeSDKClient
+        async with ClaudeSDKClient() as client:
+            options = ClaudeCodeOptions(
+                cwd=repo_path,
+                allowed_tools=["Read", "Write", "Edit", "MultiEdit", "Bash", "Glob", "Grep", "LS", "WebFetch", "TodoWrite"],
+                permission_mode='acceptEdits',
+                system_prompt=effective_system_prompt,
+                model=DEFAULT_MODEL,
+                resume=resume_session_id
+            )
+            
+            response_text = ""
+            messages_received = []
+            pending_tools = {}
+            current_session_id = None
+            start_time = datetime.now()
+            
+            # Send initial debug message
+            if log_callback:
+                await log_callback("text", {"content": "🚀 Starting Claude Code execution..."})
+            
+            # Send the query first
+            await client.query(user_prompt)
+            
+            # Then receive the streaming response
+            async for message in client.receive_response():
+                messages_received.append(message)
+                
+                # Handle different message types (message is a ClaudeSDKMessage object)
+                if hasattr(message, 'type'):
+                    if message.type == "text":
+                        # Extract text from content blocks
+                        if isinstance(message.content, list):
+                            for block in message.content:
+                                if hasattr(block, 'text') and block.text:
+                                    response_text += block.text
+                                    if log_callback:
+                                        await log_callback("text", {"content": block.text})
+                        elif isinstance(message.content, str):
+                            response_text += message.content
+                            if log_callback:
+                                await log_callback("text", {"content": message.content})
+                            
+                    elif message.type == "ultrathinking" or message.type == "thinking":
+                        if log_callback:
+                            thinking = ""
+                            if isinstance(message.content, list):
+                                for block in message.content:
+                                    if hasattr(block, 'thinking'):
+                                        thinking += block.thinking
+                            elif isinstance(message.content, str):
+                                thinking = message.content
+                            
+                            await log_callback("thinking", {
+                                "content": thinking[:200] + "..." if len(thinking) > 200 else thinking
+                            })
+                            
+                    elif message.type == "tool_use":
+                        # Extract tool info from content blocks
+                        for block in message.content if isinstance(message.content, list) else []:
+                            if hasattr(block, 'name'):
+                                tool_id = getattr(block, 'id', str(time.time()))
+                                tool_name = block.name
+                                tool_input = getattr(block, 'input', {})
+                                
+                                pending_tools[tool_id] = {
+                                    "name": tool_name,
+                                    "input": tool_input,
+                                    "summary": extract_tool_summary(tool_name, tool_input)
+                                }
+                                
+                                if log_callback:
+                                    await log_callback("tool_start", {
+                                        "tool_id": tool_id,
+                                        "tool_name": tool_name,
+                                        "summary": pending_tools[tool_id]["summary"],
+                                        "input": tool_input
+                                    })
+                            
+                    elif message.type == "tool_result":
+                        # Handle tool results  
+                        tool_id = getattr(message, 'tool_use_id', "")
+                        tool_info = pending_tools.get(tool_id, {})
+                        content = getattr(message, 'content', "")
+                        is_error = getattr(message, 'is_error', False)
+                        
+                        if log_callback:
+                            diff_info = None
+                            if tool_info.get("name") in ["Edit", "MultiEdit"] and content:
+                                content_str = str(content)
+                                if "updated" in content_str.lower() or "modified" in content_str.lower():
+                                    diff_info = content_str
+                            
+                            await log_callback("tool_result", {
+                                "tool_id": tool_id,
+                                "tool_name": tool_info.get("name", "unknown"),
+                                "summary": tool_info.get("summary", "Tool completed"),
+                                "is_error": is_error,
+                                "content": str(content)[:500] if content else None,
+                                "diff_info": diff_info
+                            })
+                        
+                        pending_tools.pop(tool_id, None)
+                        
+                    elif message.type == "result":
+                        # Extract session ID from result message
+                        current_session_id = getattr(message, 'session_id', None)
+                        if current_session_id:
+                            print(f"Extracted Claude Code session ID: {current_session_id}")
+                        
+                        duration_ms = (datetime.now() - start_time).total_seconds() * 1000
+                        if log_callback:
+                            await log_callback("result", {
+                                "duration_ms": int(duration_ms),
+                                "api_duration_ms": getattr(message, 'duration_ms', 0),
+                                "turns": getattr(message, 'num_turns', 0),
+                                "total_cost_usd": getattr(message, 'total_cost_usd', 0),
+                                "is_error": getattr(message, 'is_error', False),
+                                "session_id": current_session_id
+                            })
+            
+            # Extract commit message and summary
+            commit_msg = ""
+            if "<COMMIT_MSG>" in response_text and "</COMMIT_MSG>" in response_text:
+                commit_msg = response_text.split("<COMMIT_MSG>", 1)[1].split("</COMMIT_MSG>", 1)[0].strip()
+            
+            if not commit_msg:
+                commit_msg = instruction.strip()[:72]
+            
+            diff_summary = "Changes applied directly via Claude Code SDK"
+            if "<SUMMARY>" in response_text and "</SUMMARY>" in response_text:
+                diff_summary = response_text.split("<SUMMARY>", 1)[1].split("</SUMMARY>", 1)[0].strip()
+            
+            return commit_msg, diff_summary, current_session_id
+            
+    except ImportError:
+        # Fallback to old implementation if new client not available
+        print("⚠️ New ClaudeSDKClient not available, using fallback implementation")
         
-        # Add immediate debug message to test real-time transmission
+        # Old implementation using direct query import
+        from claude_code_sdk import query
+        from claude_code_sdk.types import (
+            Message, UserMessage, AssistantMessage, SystemMessage, ResultMessage,
+            ContentBlock, TextBlock, ThinkingBlock, ToolUseBlock, ToolResultBlock
+        )
+        
+        options = ClaudeCodeOptions(
+            cwd=repo_path,
+            allowed_tools=["Read", "Write", "Edit", "MultiEdit", "Bash", "Glob", "Grep", "LS"],
+            permission_mode='acceptEdits',
+            system_prompt=effective_system_prompt,
+            model=DEFAULT_MODEL,
+            resume=resume_session_id
+        )
+        
+        response_text = ""
+        messages_received = []
+        pending_tools = {}
+        current_session_id = None
+        start_time = datetime.now()
+        
         if log_callback:
-            await log_callback("text", {"content": "🚀 Starting Claude Code execution..."})
+            await log_callback("text", {"content": "🚀 Starting Claude Code execution (fallback mode)..."})
         
         async for message in query(prompt=user_prompt, options=options):
             messages_received.append(message)
-            message_count += 1
-            print(f"Received message #{message_count} type: {type(message).__name__}")
             
-            # Skip internal debug messages to avoid cluttering the UI
-            
-            # Log different message types
             if isinstance(message, SystemMessage):
-                # Skip system init messages - they're not useful for users
                 if message.subtype == "init":
                     continue
                     
@@ -238,7 +378,6 @@ async def generate_diff_with_logging(
                     elif isinstance(block, ToolResultBlock):
                         tool_info = pending_tools.get(block.tool_use_id, {})
                         if log_callback:
-                            # For Edit operations, try to extract diff-like information
                             diff_info = None
                             if tool_info.get("name") in ["Edit", "MultiEdit"] and block.content:
                                 try:
@@ -257,11 +396,9 @@ async def generate_diff_with_logging(
                                 "diff_info": diff_info
                             })
                         
-                        # Clean up pending tools
                         pending_tools.pop(block.tool_use_id, None)
                         
             elif isinstance(message, ResultMessage):
-                # Extract session ID from ResultMessage
                 if hasattr(message, 'session_id') and message.session_id:
                     current_session_id = message.session_id
                     print(f"Extracted Claude Code session ID: {current_session_id}")
@@ -276,31 +413,23 @@ async def generate_diff_with_logging(
                         "is_error": message.is_error,
                         "session_id": current_session_id
                     })
-                    
+        
+        # Extract commit message and summary
+        commit_msg = ""
+        if "<COMMIT_MSG>" in response_text and "</COMMIT_MSG>" in response_text:
+            commit_msg = response_text.split("<COMMIT_MSG>", 1)[1].split("</COMMIT_MSG>", 1)[0].strip()
+        
+        if not commit_msg:
+            commit_msg = instruction.strip()[:72]
+        
+        diff_summary = "Changes applied directly via Claude Code SDK"
+        if "<SUMMARY>" in response_text and "</SUMMARY>" in response_text:
+            diff_summary = response_text.split("<SUMMARY>", 1)[1].split("</SUMMARY>", 1)[0].strip()
+        
+        return commit_msg, diff_summary, current_session_id
+    
     except Exception as exc:
         print(f"Claude Code SDK exception: {type(exc).__name__}: {exc}")
         if log_callback:
             await log_callback("error", {"message": str(exc)})
         raise RuntimeError(f"Claude Code SDK execution failed: {exc}") from exc
-    
-    print(f"Claude Code SDK completed. Received {message_count} messages.")
-    
-    # If no messages were received, Claude Code SDK might not be working properly
-    if message_count == 0:
-        print("No messages received from Claude Code SDK - falling back to simple response")
-        response_text = f"I understand you want to: {instruction}\n\nHowever, Claude Code SDK is not fully configured. Please check if Claude Code CLI is installed or set up your ANTHROPIC_API_KEY."
-    
-    # Extract commit message and summary
-    commit_msg = ""
-    if "<COMMIT_MSG>" in response_text and "</COMMIT_MSG>" in response_text:
-        commit_msg = response_text.split("<COMMIT_MSG>", 1)[1].split("</COMMIT_MSG>", 1)[0].strip()
-    
-    if not commit_msg:
-        commit_msg = instruction.strip()[:72]
-    
-    diff_summary = "Changes applied directly via Claude Code SDK"
-    if "<SUMMARY>" in response_text and "</SUMMARY>" in response_text:
-        diff_summary = response_text.split("<SUMMARY>", 1)[1].split("</SUMMARY>", 1)[0].strip()
-    
-    # Return session ID for conversation continuity
-    return commit_msg, diff_summary, current_session_id

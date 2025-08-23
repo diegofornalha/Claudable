@@ -12,8 +12,11 @@ from app.api.settings import router as settings_router
 from app.api.project_services import router as project_services_router
 from app.api.github import router as github_router
 from app.api.vercel import router as vercel_router
+from app.api.claudable_interactive import router as claudable_interactive_router
 from app.core.logging import configure_logging
 from app.core.terminal_ui import ui
+from fastapi import WebSocket
+from app.claudable_terminal.websocket_handler import terminal_ws
 from sqlalchemy import inspect
 from app.db.base import Base
 import app.models  # noqa: F401 ensures models are imported for metadata
@@ -64,6 +67,14 @@ app.include_router(settings_router)  # Settings API
 app.include_router(project_services_router)  # Project services API
 app.include_router(github_router)  # GitHub integration API
 app.include_router(vercel_router)  # Vercel integration API
+app.include_router(claudable_interactive_router)  # Terminal interativo com PTY
+
+
+# ClaudableTerminal WebSocket endpoint
+@app.websocket("/ws/terminal/{project_id}")
+async def terminal_endpoint(websocket: WebSocket, project_id: str):
+    """WebSocket endpoint para ClaudableTerminal"""
+    await terminal_ws.handle(websocket, project_id)
 
 
 @app.get("/health")
@@ -83,7 +94,7 @@ def on_startup() -> None:
     # Show available endpoints
     ui.info("API server ready")
     ui.panel(
-        "WebSocket: /api/chat/{project_id}\nREST API: /api/projects, /api/chat, /api/github, /api/vercel",
+        "WebSocket: /api/chat/{project_id}, /ws/terminal/{project_id}\nREST API: /api/projects, /api/chat, /api/github, /api/vercel",
         title="Available Endpoints",
         style="green"
     )

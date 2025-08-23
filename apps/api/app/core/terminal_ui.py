@@ -93,17 +93,17 @@ class TerminalUI:
         self.console.print(panel)
     
     def ascii_logo(self):
-        """Display ASCII art logo for Claudable"""
-        # Create "CLAUDABLE" logo with orange color from the image
+        """Display ASCII art logo for Codable"""
+        # Create "CODABLE" logo with orange color from the image
         logo_text = Text()
         
-        # CLAUDABLE ASCII art
-        logo_text.append(" ██████╗██╗      █████╗ ██╗   ██╗██████╗  █████╗ ██████╗ ██╗     ███████╗\n", style="rgb(182,109,77)")
-        logo_text.append("██╔════╝██║     ██╔══██╗██║   ██║██╔══██╗██╔══██╗██╔══██╗██║     ██╔════╝\n", style="rgb(182,109,77)")
-        logo_text.append("██║     ██║     ███████║██║   ██║██║  ██║███████║██████╔╝██║     █████╗  \n", style="rgb(182,109,77)")
-        logo_text.append("██║     ██║     ██╔══██║██║   ██║██║  ██║██╔══██║██╔══██╗██║     ██╔══╝  \n", style="rgb(182,109,77)")
-        logo_text.append("╚██████╗███████╗██║  ██║╚██████╔╝██████╔╝██║  ██║██████╔╝███████╗███████╗\n", style="rgb(182,109,77)")
-        logo_text.append(" ╚═════╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═════╝ ╚══════╝╚══════╝", style="rgb(182,109,77)")
+        # CODABLE ASCII art
+        logo_text.append(" ██████╗ ██████╗ ██████╗  █████╗ ██████╗ ██╗     ███████╗\n", style="rgb(255,107,53)") 
+        logo_text.append("██╔════╝██╔═══██╗██╔══██╗██╔══██╗██╔══██╗██║     ██╔════╝\n", style="rgb(255,107,53)")
+        logo_text.append("██║     ██║   ██║██║  ██║███████║██████╔╝██║     █████╗  \n", style="rgb(255,107,53)")
+        logo_text.append("██║     ██║   ██║██║  ██║██╔══██║██╔══██╗██║     ██╔══╝  \n", style="rgb(255,107,53)")
+        logo_text.append("╚██████╗╚██████╔╝██████╔╝██║  ██║██████╔╝███████╗███████╗\n", style="rgb(255,107,53)")
+        logo_text.append(" ╚═════╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═════╝ ╚══════╝╚══════╝", style="rgb(255,107,53)")
         
         self.console.print()
         
@@ -112,7 +112,7 @@ class TerminalUI:
         self.console.print()
         
         # Tagline
-        tagline = Text("Connect Claude Code. Build what you want. Deploy instantly.", style="rgb(182,109,77) bold")
+        tagline = Text("Conecte o Claude Code. Construa o que você quiser. Faça deploy instantaneamente.", style="rgb(255,107,53) bold")
         
         self.console.print(tagline)
         self.console.print()  # Add blank line

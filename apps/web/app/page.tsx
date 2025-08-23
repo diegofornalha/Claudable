@@ -658,7 +658,16 @@ export default function HomePage() {
             </div>
           </div>
           
-          <div className="p-2 border-t border-gray-200 dark:border-white/10">
+          <div className="p-2 border-t border-gray-200 dark:border-white/10 space-y-1">
+            <button 
+              onClick={() => router.push('/login')}
+              className="w-full flex items-center gap-2 p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-all text-sm"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Claude Login
+            </button>
             <button 
               onClick={() => setShowGlobalSettings(true)}
               className="w-full flex items-center gap-2 p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-all text-sm"
@@ -679,25 +688,10 @@ export default function HomePage() {
           <div className="w-full max-w-4xl">
             <div className="text-center mb-12">
               <div className="flex justify-center mb-6">
-                <Image 
-                  src="/logo-white.png"
-                  alt="Claudable"
-                  width={200}
-                  height={56}
-                  className="h-14 w-auto dark:block hidden"
-                  priority
-                />
-                <Image 
-                  src="/logo.png"
-                  alt="Claudable"
-                  width={200}
-                  height={56}
-                  className="h-14 w-auto block dark:hidden"
-                  priority
-                />
+                <h1 className="text-5xl font-bold text-orange-500" style={{ color: '#FF6B35' }}>Codable</h1>
               </div>
               <p className="text-xl text-gray-700 dark:text-white/80 font-light tracking-tight">
-                Connect Claude Code. Build what you want. Deploy instantly.
+                Conecte o Claude Code. Construa o que você quiser. Faça deploy instantaneamente.
               </p>
             </div>
             

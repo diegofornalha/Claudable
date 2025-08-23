@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 import os
 from app.core.config import settings
 from app.api.deps import get_db
@@ -13,9 +13,9 @@ router = APIRouter(prefix="/api/commits", tags=["commits"])
 
 class Commit(BaseModel):
     commit_sha: str
-    parent_sha: str | None
-    author: str | None
-    date: str | None
+    parent_sha: Optional[str]
+    author: Optional[str]
+    date: Optional[str]
     message: str
 
 
