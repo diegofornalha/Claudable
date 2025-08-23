@@ -35,7 +35,7 @@ export default function ClaudableTerminalInteractive({
         fontSize: 14,
         fontFamily: 'Menlo, Monaco, "Courier New", monospace',
         theme: {
-          background: '#1a1a1a',
+          background: '#000000',
           foreground: '#d4d4d4',
           cursor: '#d4d4d4',
           black: '#000000',
@@ -197,31 +197,8 @@ export default function ClaudableTerminalInteractive({
   }, [isSessionStarted]);
 
   return (
-    <div className="w-full bg-black rounded-lg overflow-hidden" style={{ height: '400px' }}>
-      <div className="flex items-center justify-between px-4 py-2 bg-gray-800 border-b border-gray-700">
-        <div className="flex items-center gap-2">
-          <div className="flex gap-1.5">
-            <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-            <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-          </div>
-          <span className="text-xs text-gray-400 ml-2">Terminal</span>
-        </div>
-        <div className="flex items-center gap-2">
-          {isConnected ? (
-            <div className="flex items-center gap-1">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-xs text-green-400">Conectado</span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-1">
-              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-              <span className="text-xs text-red-400">Desconectado</span>
-            </div>
-          )}
-        </div>
-      </div>
-      <div ref={terminalRef} className="p-2" style={{ height: 'calc(100% - 48px)' }} />
+    <div className="w-full h-full bg-black">
+      <div ref={terminalRef} className="w-full h-full" />
     </div>
   );
 }

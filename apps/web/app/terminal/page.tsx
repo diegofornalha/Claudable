@@ -38,12 +38,6 @@ export default function TerminalInteractivePage() {
   }
 
   return (
-    <div className="min-h-screen bg-black">
-      <div className="h-screen flex flex-col">
-        <div className="flex-1">
-          <ClaudableTerminalInteractive projectId="interactive-test" />
-        </div>
-      </div>
-    </div>
+    <ClaudableTerminalInteractive projectId="interactive-test" />
   );
 }

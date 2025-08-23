@@ -9,7 +9,7 @@ const webDir = path.join(__dirname, '..', 'apps', 'web');
 const isWindows = os.platform() === 'win32';
 
 // Get Web port from environment or use default
-const webPort = process.env.WEB_PORT || 3000;
+const webPort = process.env.WEB_PORT || 3001; 
 
 // Start the Web server
 console.log(`Starting Web server on http://localhost:${webPort}...`);
