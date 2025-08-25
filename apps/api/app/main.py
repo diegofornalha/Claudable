@@ -106,6 +106,6 @@ def on_startup() -> None:
     env_info = {
         "Environment": os.getenv("ENVIRONMENT", "development"),
         "Debug": os.getenv("DEBUG", "false"),
-        "Port": os.getenv("PORT", "8000")
+        "Port": os.getenv("PORT", "8282")
     }
     ui.status_line(env_info)

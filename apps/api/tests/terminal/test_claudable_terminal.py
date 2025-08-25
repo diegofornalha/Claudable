@@ -7,7 +7,7 @@ import websockets
 async def test_terminal():
     """Testa conexão e comandos básicos do terminal"""
     project_id = "test-project-123"
-    uri = f"ws://localhost:8000/ws/terminal/{project_id}"
+    uri = f"ws://localhost:8282/ws/terminal/{project_id}"
     
     print(f"🔌 Conectando ao ClaudableTerminal: {uri}")
     

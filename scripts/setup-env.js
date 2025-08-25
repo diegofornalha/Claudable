@@ -9,7 +9,7 @@ const envFile = path.join(rootDir, '.env');
 const webEnvFile = path.join(rootDir, 'apps', 'web', '.env.local');
 
 // Default ports
-const DEFAULT_API_PORT = 8000;
+const DEFAULT_API_PORT = 8282;
 const DEFAULT_WEB_PORT = 3001; 
 
 // Check if port is available

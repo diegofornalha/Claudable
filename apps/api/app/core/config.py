@@ -32,7 +32,7 @@ PROJECT_ROOT = find_project_root()
 
 
 class Settings(BaseModel):
-    api_port: int = int(os.getenv("API_PORT", "8000"))
+    api_port: int = int(os.getenv("API_PORT", "8282"))
     
     # SQLite database URL
     database_url: str = os.getenv(

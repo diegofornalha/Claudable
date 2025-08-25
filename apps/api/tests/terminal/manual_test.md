@@ -16,8 +16,8 @@
 
 ## 🚀 Servidores Rodando
 
-- **FastAPI**: http://localhost:8000
-  - WebSocket: ws://localhost:8000/ws/terminal/{project_id}
+- **FastAPI**: http://localhost:8282
+  - WebSocket: ws://localhost:8282/ws/terminal/{project_id}
   
 - **Next.js**: http://localhost:3001'
   - ClaudableTerminal visível na aba "Variáveis de Ambiente"
@@ -52,7 +52,7 @@
 
 ### Backend está OK:
 ```bash
-curl http://localhost:8000/health
+curl http://localhost:8282/health
 # Resposta: {"ok": true}
 ```
 
@@ -66,7 +66,7 @@ claude --version
 ```
 
 ### WebSocket endpoint está acessível:
-- Endpoint: `ws://localhost:8000/ws/terminal/{project_id}`
+- Endpoint: `ws://localhost:8282/ws/terminal/{project_id}`
 - Aceita conexões WebSocket
 - Envia mensagem inicial com status
 
