@@ -92,3 +92,4 @@ data/
 docs/
 
 .claude/
+.claude-flow/metrics/system-metrics.json
